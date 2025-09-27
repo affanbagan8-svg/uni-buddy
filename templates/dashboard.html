@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Uni Buddy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-home"></i> Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <span class="badge bg-primary">{{ today_schedule|length }} tasks today</span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Upcoming Events Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-alt"></i> Upcoming Events
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_events %}
+                    {% for event in upcoming_events %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <strong>{{ event[0] }}</strong><br>
+                            <small class="text-muted">{{ event[1] }} at {{ event[2] }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('events') }}" class="btn btn-primary btn-sm">View All Events</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No upcoming events</p>
+                    <a href="{{ url_for('create_event') }}" class="btn btn-outline-primary btn-sm">Create Event</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Schedule Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock"></i> Today's Schedule
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if today_schedule %}
+                    {% for item in today_schedule %}
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <strong>{{ item[0] }}</strong><br>
+                            <small class="text-muted">{{ item[1] }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('schedule') }}" class="btn btn-success btn-sm">View Schedule</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No items scheduled for today</p>
+                    <a href="{{ url_for('add_schedule_item') }}" class="btn btn-outline-success btn-sm">Add Item</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notifications Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bell"></i> Recent Notifications
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_notifications %}
+                    {% for notification in recent_notifications %}
+                    <div class="border-bottom py-2">
+                        <strong>{{ notification[0] }}</strong><br>
+                        <small class="text-muted">{{ notification[1][:50] }}{% if notification[1]|length > 50 %}...{% endif %}</small><br>
+                        <small class="text-muted">{{ notification[2] }}</small>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('notifications') }}" class="btn btn-warning btn-sm">View All</a>
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent notifications</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('create_event') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-plus"></i> Create Event
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('upload_resource') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-upload"></i> Upload Resource
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('add_schedule_item') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-calendar-plus"></i> Add to Schedule
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('resources') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-search"></i> Browse Resources
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

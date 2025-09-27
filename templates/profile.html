@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Uni Buddy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-user"></i> My Profile</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Profile Information -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-circle"></i> Personal Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Full Name:</strong><br>
+                    <span class="text-muted">{{ user.full_name }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Username:</strong><br>
+                    <span class="text-muted">{{ user.username }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Student ID:</strong><br>
+                    <span class="text-muted">{{ user.student_id }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Email:</strong><br>
+                    <span class="text-muted">{{ user.email }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Statistics -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar"></i> Activity Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-0">{{ stats.resources }}</h4>
+                            <small class="text-muted">Resources Uploaded</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-calendar fa-2x text-success mb-2"></i>
+                            <h4 class="mb-0">{{ stats.schedule_items }}</h4>
+                            <small class="text-muted">Schedule Items</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-plus-circle fa-2x text-info mb-2"></i>
+                            <h4 class="mb-0">{{ stats.events_created }}</h4>
+                            <small class="text-muted">Events Created</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <i class="fas fa-check-circle fa-2x text-warning mb-2"></i>
+                            <h4 class="mb-0">{{ stats.events_rsvpd }}</h4>
+                            <small class="text-muted">Events RSVP'd</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 mb-2">
+                        <a href="{{ url_for('home') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <a href="{{ url_for('create_event') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-plus"></i> Create Event
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <a href="{{ url_for('upload_resource') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-upload"></i> Upload Resource
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <a href="{{ url_for('add_schedule_item') }}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-calendar-plus"></i> Add Schedule
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <a href="{{ url_for('notifications') }}" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-bell"></i> Notifications
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
