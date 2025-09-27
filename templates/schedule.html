@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}My Schedule - Uni Buddy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-clock"></i> My Schedule</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('add_schedule_item') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Item
+        </a>
+    </div>
+</div>
+
+<!-- Date Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <label for="date" class="form-label">Select Date:</label>
+                        <input type="date" class="form-control" id="date" name="date" 
+                               value="{{ selected_date }}" onchange="this.form.submit()">
+                    </div>
+                    <div class="col-md-8">
+                        <a href="{{ url_for('schedule') }}" class="btn btn-outline-primary">Today</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Items -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Schedule for {{ selected_date }}</h5>
+            </div>
+            <div class="card-body">
+                {% if schedule_items %}
+                    <div class="list-group">
+                        {% for item in schedule_items %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        {% if item[5] == 'academic' %}
+                                            <i class="fas fa-graduation-cap text-primary"></i>
+                                        {% elif item[5] == 'extracurricular' %}
+                                            <i class="fas fa-users text-success"></i>
+                                        {% else %}
+                                            <i class="fas fa-calendar text-info"></i>
+                                        {% endif %}
+                                        {{ item[1] }}
+                                    </h6>
+                                    {% if item[2] %}
+                                    <p class="mb-1">{{ item[2] }}</p>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock"></i> {{ item[4] }} 
+                                        | <span class="badge bg-secondary">{{ item[5].title() }}</span>
+                                    </small>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                            type="button" data-bs-toggle="dropdown">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item text-danger" 
+                                               href="{{ url_for('delete_schedule_item', item_id=item[0]) }}"
+                                               onclick="return confirm('Delete this item?')">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No items scheduled for this date</h4>
+                        <a href="{{ url_for('add_schedule_item') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Schedule Item
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

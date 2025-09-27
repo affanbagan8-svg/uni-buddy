@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Add Schedule Item - Uni Buddy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-calendar-plus"></i> Add Schedule Item</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('schedule') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Schedule
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Add details about this item..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="date" class="form-label">Date *</label>
+                            <input type="date" class="form-control" id="date" name="date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="time" class="form-label">Time *</label>
+                            <input type="time" class="form-control" id="time" name="time" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type *</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="">Select Type</option>
+                            <option value="academic">Academic</option>
+                            <option value="extracurricular">Extracurricular</option>
+                            <option value="personal">Personal</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('schedule') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add to Schedule
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set minimum date to today
+    document.getElementById('date').min = new Date().toISOString().split('T')[0];
+    // Set default date to today
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

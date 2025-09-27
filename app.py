@@ -414,7 +414,237 @@ def cancel_rsvp(event_id):
     conn.close()
     return redirect(url_for('events'))
 
+# RESOURCE ACCESS MODULE (Personal - user specific)
+@app.route('/resources')
+@login_required
+def resources():
+    """Display user's resources with search functionality"""
+    search = request.args.get('search', '')
+    category = request.args.get('category', '')
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    
+    query = '''SELECT id, title, description, filename, course, category, uploaded_at 
+               FROM resources WHERE user_id = ?'''
+    params = [session['user_id']]
+    
+    if search:
+        query += ' AND (title LIKE ? OR description LIKE ? OR course LIKE ?)'
+        params.extend([f'%{search}%', f'%{search}%', f'%{search}%'])
+    
+    if category:
+        query += ' AND category = ?'
+        params.append(category)
+    
+    query += ' ORDER BY uploaded_at DESC'
+    
+    c.execute(query, params)
+    resources_list = c.fetchall()
+    
+    # Get available categories for this user
+    c.execute('SELECT DISTINCT category FROM resources WHERE category IS NOT NULL AND user_id = ?',
+              (session['user_id'],))
+    categories = [row[0] for row in c.fetchall()]
+    
+    conn.close()
+    return render_template('resources.html', resources=resources_list, 
+                         categories=categories, search=search, 
+                         selected_category=category)
 
+@app.route('/resources/upload', methods=['GET', 'POST'])
+@login_required
+def upload_resource():
+    """Upload a new resource"""
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        course = request.form['course']
+        category = request.form['category']
+        
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if file:
+            filename = secure_filename(file.filename)
+            # Add timestamp and user ID to prevent filename conflicts
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = f"{timestamp}user{session['user_id']}_{filename}"
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            conn = get_db_connection()
+            c = conn.cursor()
+            c.execute('''INSERT INTO resources (title, description, filename, course, category, user_id)
+                         VALUES (?, ?, ?, ?, ?, ?)''', 
+                      (title, description, filename, course, category, session['user_id']))
+            conn.commit()
+            conn.close()
+            
+            create_notification("Resource Uploaded", 
+                              f"Successfully uploaded '{title}' for {course}", 
+                              'success', session['user_id'])
+            
+            flash('Resource uploaded successfully!', 'success')
+            return redirect(url_for('resources'))
+    
+    return render_template('upload_resource.html')
+
+@app.route('/resources/download/<int:resource_id>')
+@login_required
+def download_resource(resource_id):
+    """Download a resource file"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('SELECT filename, title FROM resources WHERE id = ? AND user_id = ?', 
+              (resource_id, session['user_id']))
+    result = c.fetchone()
+    conn.close()
+    
+    if result:
+        filename, title = result
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(file_path):
+            return send_file(file_path, as_attachment=True, download_name=title)
+    
+    flash('File not found or access denied', 'error')
+    return redirect(url_for('resources'))
+
+# PERSONAL SCHEDULE MODULE (Personal - user specific)
+@app.route('/schedule')
+@login_required
+def schedule():
+    """Display user's personal schedule"""
+    date_filter = request.args.get('date', datetime.now().strftime('%Y-%m-%d'))
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''SELECT id, title, description, date, time, type 
+                 FROM schedule WHERE date = ? AND user_id = ? ORDER BY time''', 
+              (date_filter, session['user_id']))
+    schedule_items = c.fetchall()
+    conn.close()
+    
+    return render_template('schedule.html', schedule_items=schedule_items, 
+                         selected_date=date_filter)
+
+@app.route('/schedule/add', methods=['GET', 'POST'])
+@login_required
+def add_schedule_item():
+    """Add new schedule item"""
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        date = request.form['date']
+        time = request.form['time']
+        item_type = request.form['type']
+        
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute('''INSERT INTO schedule (title, description, date, time, type, user_id)
+                     VALUES (?, ?, ?, ?, ?, ?)''', 
+                  (title, description, date, time, item_type, session['user_id']))
+        conn.commit()
+        conn.close()
+        
+        flash('Schedule item added successfully!', 'success')
+        return redirect(url_for('schedule'))
+    
+    return render_template('add_schedule.html')
+
+@app.route('/schedule/delete/<int:item_id>')
+@login_required
+def delete_schedule_item(item_id):
+    """Delete a schedule item"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('DELETE FROM schedule WHERE id = ? AND user_id = ?', 
+              (item_id, session['user_id']))
+    
+    if c.rowcount > 0:
+        flash('Schedule item deleted successfully!', 'success')
+    else:
+        flash('Schedule item not found or access denied.', 'error')
+    
+    conn.commit()
+    conn.close()
+    return redirect(url_for('schedule'))
+
+# NOTIFICATION SYSTEM MODULE (User specific)
+@app.route('/notifications')
+@login_required
+def notifications():
+    """Display user's notifications"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''SELECT id, title, message, type, read, created_at 
+                 FROM notifications 
+                 WHERE user_id = ? OR user_id IS NULL
+                 ORDER BY created_at DESC''', (session['user_id'],))
+    notifications_list = c.fetchall()
+    conn.close()
+    
+    return render_template('notifications.html', notifications=notifications_list)
+
+@app.route('/notifications/mark_read/<int:notification_id>')
+@login_required
+def mark_notification_read(notification_id):
+    """Mark notification as read"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''UPDATE notifications SET read = 1 
+                 WHERE id = ? AND (user_id = ? OR user_id IS NULL)''', 
+              (notification_id, session['user_id']))
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('notifications'))
+
+def create_notification(title, message, notification_type='info', user_id=None):
+    """Helper function to create notifications for specific user"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''INSERT INTO notifications (title, message, type, user_id)
+                 VALUES (?, ?, ?, ?)''', (title, message, notification_type, user_id))
+    conn.commit()
+    conn.close()
+
+def broadcast_notification(title, message, notification_type='info'):
+    """Helper function to create notifications for all users"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    
+    # Get all user IDs
+    c.execute('SELECT id FROM users')
+    users = c.fetchall()
+    
+    # Create notification for each user
+    for user in users:
+        c.execute('''INSERT INTO notifications (title, message, type, user_id)
+                     VALUES (?, ?, ?, ?)''', (title, message, notification_type, user[0]))
+    
+    conn.commit()
+    conn.close()
+
+# API endpoints for dynamic updates
+@app.route('/api/notifications/unread')
+@login_required
+def get_unread_notifications():
+    """Get count of unread notifications for current user"""
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute('''SELECT COUNT(*) FROM notifications 
+                 WHERE read = 0 AND (user_id = ? OR user_id IS NULL)''', 
+              (session['user_id'],))
+    count = c.fetchone()[0]
+    conn.close()
+    
+    return jsonify({'unread_count': count})
 
 # Add user context to all templates
 @app.context_processor

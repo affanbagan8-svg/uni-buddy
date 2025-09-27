@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resource - Uni Buddy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-upload"></i> Upload Resource</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('resources') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Resources
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Resource Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Describe this resource..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="course" class="form-label">Course/Subject</label>
+                            <input type="text" class="form-control" id="course" name="course" 
+                                   placeholder="e.g., Computer Science 101">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Select Category</option>
+                                <option value="Lecture Notes">Lecture Notes</option>
+                                <option value="Assignment">Assignment</option>
+                                <option value="Study Guide">Study Guide</option>
+                                <option value="Past Papers">Past Papers</option>
+                                <option value="Reference Material">Reference Material</option>
+                                <option value="Project">Project</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="file" class="form-label">File *</label>
+                        <input type="file" class="form-control" id="file" name="file" required 
+                               accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.zip,.rar">
+                        <div class="form-text">Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT, ZIP, RAR (Max: 10MB)</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('resources') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload Resource
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
